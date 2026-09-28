@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jonasstenholt.com</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX CDN for widget loading -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body class="bg-white text-black min-h-screen lg:h-screen font-sans antialiased flex flex-col items-center px-6 pt-4 pb-6 overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="w-full max-w-5xl flex items-center justify-between py-4 border-b border-neutral-100 flex-shrink-0">
+        <a href="/" class="font-semibold text-lg tracking-tight text-black hover:opacity-85 transition">
+            jonasstenholt<span class="text-neutral-400">.com</span>
+        </a>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-5xl flex-1 flex flex-col justify-start min-h-0 py-4 gap-6">
+
+        <!-- Profile / About Description -->
+        <section class="flex-shrink-0 space-y-2">
+            <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-2xl">
+                This is my personal website, where I share the various projects I have worked on professionally and academically. I hope it serves as an interesting read and provides some insight into different topics :) If you want to see a full list of my academic journey and professional experiences, please see <a href="https://www.linkedin.com/in/jonas-jensen-269120212/" target="_blank" rel="noopener noreferrer" class="text-black font-medium underline hover:text-neutral-600 transition">linkedin</a>.
+            </p>
+            <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-2xl">
+                I also built a small commit-style view for my training, because why not :) If you wanna connect, follow on <a href="https://www.strava.com/athletes/44820994" target="_blank" rel="noopener noreferrer" class="text-black font-medium underline hover:text-neutral-600 transition">strava</a>.
+            </p>
+        </section>
+
+        <!-- Projects Section (with search bar & scrollable list) -->
+        <section class="flex-initial flex flex-col min-h-0 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-shrink-0">
+                <h2 class="text-base font-semibold text-black tracking-tight">Projects</h2>
+                
+                <!-- Search Bar -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text"
+                           id="project-search"
+                           placeholder="Search projects..."
+                           autocomplete="off"
+                           oninput="filterProjects(this.value)"
+                           class="w-full text-xs bg-neutral-50/80 border border-neutral-200 rounded-lg px-3 py-1.5 pl-8 focus:outline-none focus:border-black focus:bg-white transition text-neutral-800 placeholder-neutral-400" />
+                    <svg class="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Scrollable Projects Container (takes natural content height, capped at max-h-[300px]) -->
+            <div id="projects-list-container" class="max-h-[300px] overflow-y-auto pr-2 divide-y divide-neutral-100">
+                {#for project in projects}
+                    <a href="/projects/{project.slug}" 
+                       data-search="{project.title.toLowerCase()} {project.tag.toLowerCase()} {#if project.description}{project.description.toLowerCase()}{/if}"
+                       class="project-item block py-3 group hover:opacity-80 transition duration-150 space-y-1 first:pt-0 last:pb-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-medium text-sm text-black group-hover:underline flex items-center space-x-1">
+                                <span>{project.title}</span>
+                                <span class="text-xs text-neutral-400">&nearr;</span>
+                            </h3>
+                            <span class="text-[11px] font-mono text-neutral-400">{project.tag}</span>
+                        </div>
+                        {#if project.description}
+                            <p class="text-xs text-neutral-600 leading-relaxed max-w-3xl line-clamp-2">
+                                {project.description}
+                            </p>
+                        {/if}
+                    </a>
+                {#else}
+                    <div class="text-xs text-neutral-400 py-6 text-center">
+                        No project summaries uploaded yet.
+                    </div>
+                {/for}
+                <div id="no-search-results" class="hidden text-xs text-neutral-400 py-6 text-center">
+                    No matching projects found.
+                </div>
+            </div>
+        </section>
+
+        <!-- Training Commits Section (PR View Heatmap Widget follows naturally or sits at bottom when full) -->
+        <section class="flex-shrink-0 space-y-2 pt-2 border-t border-neutral-100">
+            <h2 class="text-base font-semibold text-black tracking-tight">Training Commits</h2>
+
+            <div id="heatmap-container"
+                 hx-get="/api/activity-heatmap"
+                 hx-trigger="load"
+                 hx-swap="innerHTML"
+                 class="w-full">
+                <!-- Minimal loading placeholder -->
+                <div class="w-full bg-white border border-neutral-200 rounded-2xl p-6 animate-pulse">
+                    <div class="h-4 bg-neutral-100 rounded w-48 mb-6"></div>
+                    <div class="h-28 bg-neutral-50 rounded w-full"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        window.filterProjects = function(query) {
+            var q = (query || '').trim().toLowerCase();
+            var items = document.querySelectorAll('.project-item');
+            var noResults = document.getElementById('no-search-results');
+            var visibleCount = 0;
+
+            items.forEach(function(item) {
+                var searchData = item.getAttribute('data-search') || '';
+                if (!q || searchData.indexOf(q) !== -1) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (noResults) {
+                noResults.classList.toggle('hidden', visibleCount > 0 || items.length === 0);
+            }
+        };
+    </script>
+
+</body>
+</html>

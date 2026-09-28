@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{project.title} — jonasstenholt.com</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => { hljs.highlightAll(); });</script>
+    <style>
+        .prose pre {
+            background-color: #0d1117 !important;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid #30363d;
+            overflow-x: auto;
+        }
+        .prose pre code {
+            background-color: transparent !important;
+            padding: 0 !important;
+            font-size: 0.8125rem !important;
+            line-height: 1.5 !important;
+            color: #c9d1d9 !important;
+            border: none !important;
+        }
+        .prose :not(pre) > code {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+            padding: 0.15rem 0.35rem !important;
+            border-radius: 0.25rem !important;
+            font-size: 0.85em !important;
+            font-weight: 500 !important;
+        }
+        .prose :not(pre) > code::before,
+        .prose :not(pre) > code::after {
+            content: "" !important;
+        }
+    </style>
+</head>
+<body class="bg-white text-black min-h-screen font-sans antialiased flex flex-col items-center p-6 pb-16">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl py-6 flex items-center justify-between border-b border-neutral-100 mb-10">
+        <a href="/" class="font-semibold text-lg tracking-tight text-black hover:opacity-85 transition">
+            jonasstenholt<span class="text-neutral-400">.com</span>
+        </a>
+        <span class="text-xs text-neutral-400 font-mono">{project.tag}</span>
+    </header>
+
+    <!-- Main Project Summary Article -->
+    <main class="w-full max-w-4xl space-y-10 flex-1">
+        <!-- Project Title Header -->
+        <div class="space-y-3 pb-6 border-b border-neutral-100">
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded bg-neutral-100 font-mono text-neutral-700">{project.tag}</span>
+                {#if project.date}
+                    <span class="text-xs text-neutral-400">&bull; {project.date}</span>
+                {/if}
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-black leading-tight">
+                {project.title}
+            </h1>
+            {#if project.description}
+                <p class="text-base text-neutral-600 leading-relaxed">
+                    {project.description}
+                </p>
+            {/if}
+            {#if project.githubUrl || project.liveUrl}
+                <div class="flex items-center space-x-4 pt-2 text-xs font-medium">
+                    {#if project.githubUrl}
+                        <a href="{project.githubUrl}" target="_blank" rel="noopener noreferrer" class="text-black hover:underline flex items-center space-x-1">
+                            <span>GitHub</span>
+                            <span>&nearr;</span>
+                        </a>
+                    {/if}
+                    {#if project.liveUrl}
+                        <a href="{project.liveUrl}" target="_blank" rel="noopener noreferrer" class="text-black hover:underline flex items-center space-x-1">
+                            <span>Live Demo</span>
+                            <span>&nearr;</span>
+                        </a>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+
+        <!-- Rendered Markdown HTML Body -->
+        <article class="prose prose-neutral max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-black">
+            {project.contentHtml.raw}
+        </article>
+
+        <!-- Supplementary Materials (Video Demos, Presentations & Reports) -->
+        {#if project.documents.size > 0 || project.youtubeEmbedUrl}
+            <section class="pt-8 border-t border-neutral-200 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-black tracking-tight">Supplementary Material</h2>
+                        <p class="text-xs text-neutral-500">Video demonstrations, reports, presentations, and technical documentation.</p>
+                    </div>
+                </div>
+
+                <!-- Video Demo Player (if youtube frontmatter is provided) -->
+                {#if project.youtubeEmbedUrl}
+                    <div class="space-y-2">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-500 font-mono">Demo Video</h3>
+                        <div class="w-full aspect-video rounded-2xl overflow-hidden border border-neutral-200 shadow-sm bg-black">
+                            <iframe class="w-full h-full"
+                                    src="{project.youtubeEmbedUrl}"
+                                    title="{project.title} Video Demo"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                {/if}
+
+                <!-- PDF Documents -->
+                {#if project.documents.size > 0}
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-500 font-mono">Documents & Reports</h3>
+                            <span class="text-xs text-neutral-400 font-mono">{project.documents.size} attached</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                            {#for doc in project.documents}
+                                <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl flex items-center justify-between gap-3 hover:border-neutral-400 transition">
+                                    <div class="flex items-center space-x-3 min-w-0">
+                                        <div class="w-9 h-9 rounded-lg bg-neutral-900 text-white flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
+                                            PDF
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-xs font-semibold text-black truncate">{doc.title}</h4>
+                                            <div class="text-[11px] text-neutral-500 space-x-1">
+                                                <span>{doc.type}</span>
+                                                {#if doc.formattedSize}
+                                                    <span>&bull; {doc.formattedSize}</span>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{doc.url}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-xs font-medium px-3 py-1.5 bg-white border border-neutral-200 hover:border-black rounded-lg transition shrink-0 inline-flex items-center space-x-1 shadow-2xs">
+                                        <span>Open</span>
+                                        <span>&nearr;</span>
+                                    </a>
+                                </div>
+                            {/for}
+                        </div>
+                    </div>
+                {/if}
+            </section>
+        {/if}
+    </main>
+
+</body>
+</html>

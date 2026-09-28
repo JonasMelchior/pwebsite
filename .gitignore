@@ -1,0 +1,28 @@
+# Maven & Build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# Quarkus generated files
+.quarkus/
+quarkus.log
+
+# IDE & Editor files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets & Environment configuration files
+.env
+.env.*
+src/main/resources/application.properties
+!src/main/resources/application.properties.example
+!.mvn/wrapper/maven-wrapper.properties
+
+# External content directory
+content/
