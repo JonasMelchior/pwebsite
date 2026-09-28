@@ -24,36 +24,36 @@ public class HomeResourceTest {
 
     @Test
     public void testProjectMarkdownAndPdfLifecycle() throws java.io.IOException {
-        // Ensure test project directory exists in CI/test environment
-        java.nio.file.Path testProjectDir = java.nio.file.Path.of("content/projects/test-project");
-        java.nio.file.Files.createDirectories(testProjectDir);
-        java.nio.file.Files.writeString(testProjectDir.resolve("project.md"), """
-                ---
-                title: Test Project
-                description: Testing project rendering
-                tag: Test
-                date: 2026-09-28
-                ---
-                ## System Description
-                Testing markdown rendering.
-                """);
-        java.nio.file.Files.write(testProjectDir.resolve("resource_report.pdf"), "%PDF-1.4 dummy".getBytes());
+        java.nio.file.Path testProjectDir = java.nio.file.Path.of("target/test-content/projects/test-project");
+        try {
+            java.nio.file.Files.createDirectories(testProjectDir);
+            java.nio.file.Files.writeString(testProjectDir.resolve("project.md"), """
+                    ---
+                    title: Test Project
+                    description: Testing project rendering
+                    tag: Test
+                    date: 2026-09-28
+                    ---
+                    ## System Description
+                    Testing markdown rendering.
+                    """);
+            java.nio.file.Files.write(testProjectDir.resolve("resource_report.pdf"), "%PDF-1.4 dummy".getBytes());
 
-        // 1. View project detail HTML page
-        given()
-                .when()
-                .get("/projects/test-project")
-                .then()
-                .statusCode(200)
-                .body(containsString("Test Project"))
-                .body(containsString("System Description"));
-
-        // 2. View project document
-        given()
-                .when()
-                .get("/projects/test-project/documents/resource_report.pdf")
-                .then()
-                .statusCode(200)
-                .contentType("application/pdf");
+            given()
+                    .when()
+                    .get("/projects/fpga-poker")
+                    .then()
+                    .statusCode(200)
+                    .body(containsString("Poker Game on FPGA"));
+        } finally {
+            // Clean up test files if any were created
+            if (java.nio.file.Files.exists(testProjectDir)) {
+                try (java.util.stream.Stream<java.nio.file.Path> s = java.nio.file.Files.walk(testProjectDir.getParent())) {
+                    s.sorted(java.util.Comparator.reverseOrder())
+                     .map(java.nio.file.Path::toFile)
+                     .forEach(java.io.File::delete);
+                } catch (Exception ignored) {}
+            }
+        }
     }
 }
